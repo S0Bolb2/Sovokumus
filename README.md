@@ -1,14 +1,39 @@
+# Sovokumus API (v1)
+
+REST API для приложения по поиску сокомандников на олимпиады (профили, олимпиады, команды, приглашения).  
+Базовый URL: `http://localhost:8080`
 
 ---
 
-# 1) Пользователь / Профиль (tgId)
+## Содержание
 
-## 1.1 Получить профиль по tgId
+- [Общие соглашения](#общие-соглашения)
+- [1. Пользователь / Профиль](#1-пользователь--профиль)
+  - [1.1 Получить профиль по tgId](#11-получить-профиль-по-tgid)
+  - [1.2 Создать профиль](#12-создать-профиль)
+  - [1.3 Обновить профиль по tgId](#13-обновить-профиль-по-tgid)
+- [2. Олимпиады](#2-олимпиады)
+  - [2.1 Получить список олимпиад (поиск/фильтры)](#21-получить-список-олимпиад-поискфильтры)
+  - [2.2 Получить олимпиаду по id](#22-получить-олимпиаду-по-id)
+- [3. Команды](#3-команды)
+  - [3.1 Создать команду](#31-создать-команду)
+  - [3.2 Получить список команд (фильтры)](#32-получить-список-команд-фильтры)
+  - [3.3 Получить команду по id](#33-получить-команду-по-id)
+  - [3.4 Обновить команду](#34-обновить-команду)
+  - [3.5 Закрыть набор в команду](#35-закрыть-набор-в-команду)
+- [4. Поиск сокомандников (пользователи)](#4-поиск-сокомандников-пользователи)
+  - [4.1 Поиск пользователей по навыкам/предметам](#41-поиск-пользователей-по-навыкампредметам)
+- [5. Приглашения (invites)](#5-приглашения-invites)
+  - [5.1 Отправить приглашение пользователю в команду](#51-отправить-приглашение-пользователю-в-команду)
+  - [5.2 Получить входящие приглашения пользователя](#52-получить-входящие-приглашения-пользователя)
+  - [5.3 Принять приглашение](#53-принять-приглашение)
+  - [5.4 Отклонить приглашение](#54-отклонить-приглашение)
 
-**Method:** GET
-**URL:** `/api/v1/users/{tgId}` (пример: `/api/v1/users/7947922450`)
+---
 
-**Заголовки запроса:**
+## Общие соглашения
+
+### Заголовки (пример)
 
 ```http
 Host: localhost:8080
@@ -20,19 +45,52 @@ Accept-Encoding: gzip, deflate
 Accept-Charset: utf-8
 ```
 
-**Тело запроса:** отсутствует
-
-**Заголовки ответов:**
+Для запросов с телом:
 
 ```http
 Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
 ```
 
-**Тела ответов:**
+### Формат ошибок (единый стиль)
+
+Во всех ошибочных ответах используется объект `error`:
+
+```json
+{
+  "error": {
+    "code": "SOME_CODE",
+    "message": "Человекочитаемое описание",
+    "details": [
+      { "field": "fieldName", "issue": "reason" }
+    ]
+  }
+}
+```
+
+> Поле `details` может отсутствовать, если подробности не нужны.
+
+### Пагинация
+
+Для списков:
+
+- `page` — номер страницы (с 1)
+- `limit` — размер страницы (обычно 1–100)
+- `total` — общее количество элементов в выборке
+
+---
+
+## 1. Пользователь / Профиль
+
+### 1.1 Получить профиль по tgId
+
+**GET** `/api/v1/users/{tgId}`  
+Пример: `/api/v1/users/7947922450`
+
+**Request:** тело отсутствует
+
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "tgId": 7947922450,
@@ -48,7 +106,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -60,42 +117,22 @@ Content-Encoding: gzip
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "USER_NOT_FOUND", "message": "Пользователь не найден" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** tgId передаётся в URL как идентификатор ресурса профиля. `GET` используется для чтения и не меняет данные.
-
 ---
 
-## 1.2 Создать профиль
+### 1.2 Создать профиль
 
-**Method:** POST
-**URL:** `/api/v1/users`
+**POST** `/api/v1/users`
 
-**Заголовки запроса:**
-
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-Content-Type: application/json; charset=utf-8
-Content-Length: [автоматически]
-```
-
-**Тело запроса:**
-
+**Request body:**
 ```json
 {
   "tgId": 7947922450,
@@ -108,17 +145,9 @@ Content-Length: [автоматически]
 }
 ```
 
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **201 Created**
-
 ```json
 {
   "tgId": 7947922450,
@@ -133,7 +162,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -145,7 +173,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **409 Conflict**
-
 ```json
 {
   "error": {
@@ -156,42 +183,23 @@ Content-Encoding: gzip
 ```
 
 ❌ **413 Payload Too Large**
-
 ```json
 { "error": { "code": "PAYLOAD_TOO_LARGE", "message": "Слишком большой запрос" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** `POST` создаёт новый профиль, поэтому `201`. `409` — если профиль с этим tgId уже существует.
-
 ---
 
-## 1.3 Обновить профиль по tgId
+### 1.3 Обновить профиль по tgId
 
-**Method:** PUT
-**URL:** `/api/v1/users/{tgId}` (пример: `/api/v1/users/7947922450`)
+**PUT** `/api/v1/users/{tgId}`  
+Пример: `/api/v1/users/7947922450`
 
-**Заголовки запроса:**
-
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-Content-Type: application/json; charset=utf-8
-Content-Length: [автоматически]
-```
-
-**Тело запроса:**
-
+**Request body:**
 ```json
 {
   "name": "Алексей",
@@ -203,17 +211,9 @@ Content-Length: [автоматически]
 }
 ```
 
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "tgId": 7947922450,
@@ -228,7 +228,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -240,65 +239,38 @@ Content-Encoding: gzip
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "USER_NOT_FOUND", "message": "Пользователь не найден" } }
 ```
 
 ❌ **409 Conflict**
-
 ```json
 { "error": { "code": "PROFILE_LOCKED", "message": "Профиль нельзя изменить сейчас" } }
 ```
 
 ❌ **413 Payload Too Large**
-
 ```json
 { "error": { "code": "PAYLOAD_TOO_LARGE", "message": "Слишком большой запрос" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** `PUT` обновляет ресурс профиля по tgId. `409` — когда запрос нормальный, но бизнес-правило запрещает изменение.
-
 ---
 
-# 2) Олимпиады
+## 2. Олимпиады
 
-## 2.1 Получить список олимпиад (поиск/фильтры)
+### 2.1 Получить список олимпиад (поиск/фильтры)
 
-**Method:** GET
-**URL:** `/api/v1/olympiads?query=инф&level=regional&subject=informatics&page=1&limit=20`
+**GET** `/api/v1/olympiads?query=инф&level=regional&subject=informatics&page=1&limit=20`
 
-**Заголовки запроса:**
+**Request:** тело отсутствует
 
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-```
-
-**Тело запроса:** отсутствует
-
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "items": [
@@ -317,7 +289,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -329,45 +300,22 @@ Content-Encoding: gzip
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** список/поиск — это чтение, значит `GET`, а фильтры идут через query-параметры.
-
 ---
 
-## 2.2 Получить олимпиаду по id
+### 2.2 Получить олимпиаду по id
 
-**Method:** GET
-**URL:** `/api/v1/olympiads/{olympiadId}` (пример: `/api/v1/olympiads/ol_10`)
+**GET** `/api/v1/olympiads/{olympiadId}`  
+Пример: `/api/v1/olympiads/ol_10`
 
-**Заголовки запроса:**
+**Request:** тело отсутствует
 
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-```
-
-**Тело запроса:** отсутствует
-
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "id": "ol_10",
@@ -379,44 +327,24 @@ Content-Encoding: gzip
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "OLYMPIAD_NOT_FOUND", "message": "Олимпиада не найдена" } }
 ```
 
 ❌ **500 Internal Server Error**
-``
-
-`json
+```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
-
-````
-
-**Пояснение:** получение одного ресурса по id — стандартный `GET /resource/{id}`.
+```
 
 ---
 
-# 3) Команды
+## 3. Команды
 
-## 3.1 Создать команду
-**Method:** POST  
-**URL:** `/api/v1/teams`
+### 3.1 Создать команду
 
-**Заголовки запроса:**
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-Content-Type: application/json; charset=utf-8
-Content-Length: [автоматически]
-````
+**POST** `/api/v1/teams`
 
-**Тело запроса:**
-
+**Request body:**
 ```json
 {
   "ownerTgId": 7947922450,
@@ -429,17 +357,9 @@ Content-Length: [автоматически]
 }
 ```
 
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **201 Created**
-
 ```json
 {
   "id": "t_501",
@@ -453,7 +373,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -465,13 +384,11 @@ Content-Encoding: gzip
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "OLYMPIAD_NOT_FOUND", "message": "Олимпиада не найдена" } }
 ```
 
 ❌ **409 Conflict**
-
 ```json
 {
   "error": {
@@ -482,51 +399,26 @@ Content-Encoding: gzip
 ```
 
 ❌ **413 Payload Too Large**
-
 ```json
 { "error": { "code": "PAYLOAD_TOO_LARGE", "message": "Слишком большой запрос" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** `POST` создаёт команду → `201`. `ownerTgId` нужен, раз у вас идентификация через tgId.
-
 ---
 
-## 3.2 Получить список команд (фильтры)
+### 3.2 Получить список команд (фильтры)
 
-**Method:** GET
-**URL:** `/api/v1/teams?olympiadId=ol_10&city=Казань&remote=true&skill=graphs&page=1&limit=20`
+**GET** `/api/v1/teams?olympiadId=ol_10&city=Казань&remote=true&skill=graphs&page=1&limit=20`
 
-**Заголовки запроса:**
+**Request:** тело отсутствует
 
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-```
-
-**Тело запроса:** отсутствует
-
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "items": [
@@ -547,7 +439,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -559,45 +450,22 @@ Content-Encoding: gzip
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** список — `GET`, фильтры в query, чтобы менять выборку без body.
-
 ---
 
-## 3.3 Получить команду по id
+### 3.3 Получить команду по id
 
-**Method:** GET
-**URL:** `/api/v1/teams/{teamId}` (пример: `/api/v1/teams/t_501`)
+**GET** `/api/v1/teams/{teamId}`  
+Пример: `/api/v1/teams/t_501`
 
-**Заголовки запроса:**
+**Request:** тело отсутствует
 
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-```
-
-**Тело запроса:** отсутствует
-
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "id": "t_501",
@@ -614,42 +482,23 @@ Content-Encoding: gzip
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "TEAM_NOT_FOUND", "message": "Команда не найдена" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** ресурс “команда” по id — `GET /teams/{teamId}`.
-
 ---
 
-## 3.4 Обновить команду
+### 3.4 Обновить команду
 
-**Method:** PUT
-**URL:** `/api/v1/teams/{teamId}` (пример: `/api/v1/teams/t_501`)
+**PUT** `/api/v1/teams/{teamId}`  
+Пример: `/api/v1/teams/t_501`
 
-**Заголовки запроса:**
-
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-Content-Type: application/json; charset=utf-8
-Content-Length: [автоматически]
-```
-
-**Тело запроса:**
-
+**Request body:**
 ```json
 {
   "title": "Кодим и побеждаем (обновлено)",
@@ -660,17 +509,9 @@ Content-Length: [автоматически]
 }
 ```
 
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "id": "t_501",
@@ -684,7 +525,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -696,121 +536,69 @@ Content-Encoding: gzip
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "TEAM_NOT_FOUND", "message": "Команда не найдена" } }
 ```
 
 ❌ **409 Conflict**
-
 ```json
 { "error": { "code": "TEAM_CLOSED", "message": "Нельзя изменить команду: набор закрыт" } }
 ```
 
 ❌ **413 Payload Too Large**
-
 ```json
 { "error": { "code": "PAYLOAD_TOO_LARGE", "message": "Слишком большой запрос" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** `PUT` меняет данные команды. `409` — если команда уже в таком состоянии, что менять нельзя.
-
 ---
 
-## 3.5 Закрыть набор в команду
+### 3.5 Закрыть набор в команду
 
-**Method:** PATCH
-**URL:** `/api/v1/teams/{teamId}/close` (пример: `/api/v1/teams/t_501/close`)
+**PATCH** `/api/v1/teams/{teamId}/close`  
+Пример: `/api/v1/teams/t_501/close`
 
-**Заголовки запроса:**
+**Request:** тело отсутствует
 
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-```
-
-**Тело запроса:** отсутствует
-
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 { "id": "t_501", "status": "closed" }
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "TEAM_NOT_FOUND", "message": "Команда не найдена" } }
 ```
 
 ❌ **409 Conflict**
-
 ```json
 { "error": { "code": "ALREADY_CLOSED", "message": "Команда уже закрыта для набора" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** это изменение одного поля-состояния, поэтому удобнее отдельное действие `PATCH /close`.
-
 ---
 
-# 4) Поиск сокомандников (пользователи)
+## 4. Поиск сокомандников (пользователи)
 
-## 4.1 Поиск пользователей по навыкам/предметам
+### 4.1 Поиск пользователей по навыкам/предметам
 
-**Method:** GET
-**URL:** `/api/v1/users?skill=graphs&subject=informatics&level=advanced&city=Казань&remote=true&page=1&limit=20`
+**GET** `/api/v1/users?skill=graphs&subject=informatics&level=advanced&city=Казань&remote=true&page=1&limit=20`
 
-**Заголовки запроса:**
+**Request:** тело отсутствует
 
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-```
-
-**Тело запроса:** отсутствует
-
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "items": [
@@ -831,7 +619,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -843,38 +630,20 @@ Content-Encoding: gzip
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** поиск — это получение списка по критериям, поэтому `GET` + query-параметры.
-
 ---
 
-# 5) Приглашения (invites)
+## 5. Приглашения (invites)
 
-## 5.1 Отправить приглашение пользователю в команду
+### 5.1 Отправить приглашение пользователю в команду
 
-**Method:** POST
-**URL:** `/api/v1/teams/{teamId}/invites` (пример: `/api/v1/teams/t_501/invites`)
+**POST** `/api/v1/teams/{teamId}/invites`  
+Пример: `/api/v1/teams/t_501/invites`
 
-**Заголовки запроса:**
-
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-Content-Type: application/json; charset=utf-8
-Content-Length: [автоматически]
-```
-
-**Тело запроса:**
-
+**Request body:**
 ```json
 {
   "fromTgId": 7947922450,
@@ -883,17 +652,9 @@ Content-Length: [автоматически]
 }
 ```
 
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **201 Created**
-
 ```json
 {
   "id": "inv_9001",
@@ -906,7 +667,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -917,20 +677,16 @@ Content-Encoding: gzip
 }
 ```
 
-❌ **404 Not Found**
-
+❌ **404 Not Found** (команда или пользователь)
 ```json
 { "error": { "code": "TEAM_NOT_FOUND", "message": "Команда не найдена" } }
 ```
-
 или
-
 ```json
 { "error": { "code": "USER_NOT_FOUND", "message": "Пользователь не найден" } }
 ```
 
 ❌ **409 Conflict**
-
 ```json
 {
   "error": {
@@ -941,52 +697,27 @@ Content-Encoding: gzip
 ```
 
 ❌ **413 Payload Too Large**
-
 ```json
 { "error": { "code": "PAYLOAD_TOO_LARGE", "message": "Слишком большой запрос" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** `POST` создаёт ресурс “приглашение”. `409` — если состояние не позволяет создать новое (дубликат/закрыто).
-
 ---
 
-## 5.2 Получить входящие приглашения пользователя (по tgId)
+### 5.2 Получить входящие приглашения пользователя
 
-**Method:** GET
-**URL:** `/api/v1/users/{tgId}/invites?status=pending&page=1&limit=20`
+**GET** `/api/v1/users/{tgId}/invites?status=pending&page=1&limit=20`  
 Пример: `/api/v1/users/8195976349/invites?status=pending&page=1&limit=20`
 
-**Заголовки запроса:**
+**Request:** тело отсутствует
 
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-```
-
-**Тело запроса:** отсутствует
-
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "items": [
@@ -1006,7 +737,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -1018,59 +748,32 @@ Content-Encoding: gzip
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "USER_NOT_FOUND", "message": "Пользователь не найден" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** список приглашений — это чтение, поэтому `GET`. Статус/пагинация — через query.
-
 ---
 
-## 5.3 Принять приглашение
+### 5.3 Принять приглашение
 
-**Method:** POST
-**URL:** `/api/v1/invites/{inviteId}/accept` (пример: `/api/v1/invites/inv_9001/accept`)
+**POST** `/api/v1/invites/{inviteId}/accept`  
+Пример: `/api/v1/invites/inv_9001/accept`
 
-**Заголовки запроса:**
-
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-Content-Type: application/json; charset=utf-8
-Content-Length: [автоматически]
-```
-
-**Тело запроса:** можно пустое, но чтобы было явно “кто принимает”:
-
+**Request body:** (можно пустое, но явнее указать, кто принимает)
 ```json
 {
   "byTgId": 8195976349
 }
 ```
 
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "id": "inv_9001",
@@ -1080,7 +783,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -1092,13 +794,11 @@ Content-Encoding: gzip
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "INVITE_NOT_FOUND", "message": "Приглашение не найдено" } }
 ```
 
 ❌ **409 Conflict**
-
 ```json
 {
   "error": {
@@ -1109,36 +809,18 @@ Content-Encoding: gzip
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** это действие меняет состояние приглашения, поэтому `POST` на “action endpoint” (`/accept`) — понятно и наглядно для ДЗ.
-
 ---
 
-## 5.4 Отклонить приглашение
+### 5.4 Отклонить приглашение
 
-**Method:** POST
-**URL:** `/api/v1/invites/{inviteId}/reject` (пример: `/api/v1/invites/inv_9001/reject`)
+**POST** `/api/v1/invites/{inviteId}/reject`  
+Пример: `/api/v1/invites/inv_9001/reject`
 
-**Заголовки запроса:**
-
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-Content-Type: application/json; charset=utf-8
-Content-Length: [автоматически]
-```
-
-**Тело запроса:**
-
+**Request body:**
 ```json
 {
   "byTgId": 8195976349,
@@ -1146,17 +828,9 @@ Content-Length: [автоматически]
 }
 ```
 
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
+**Responses:**
 
 ✅ **200 OK**
-
 ```json
 {
   "id": "inv_9001",
@@ -1166,7 +840,6 @@ Content-Encoding: gzip
 ```
 
 ❌ **400 Bad Request**
-
 ```json
 {
   "error": {
@@ -1178,13 +851,11 @@ Content-Encoding: gzip
 ```
 
 ❌ **404 Not Found**
-
 ```json
 { "error": { "code": "INVITE_NOT_FOUND", "message": "Приглашение не найдено" } }
 ```
 
 ❌ **409 Conflict**
-
 ```json
 {
   "error": {
@@ -1194,18 +865,42 @@ Content-Encoding: gzip
 }
 ```
 
-❌ **413 Payload Too Large** (если reason слишком длинный)
-
+❌ **413 Payload Too Large**
 ```json
 { "error": { "code": "PAYLOAD_TOO_LARGE", "message": "Слишком большой запрос" } }
 ```
 
 ❌ **500 Internal Server Error**
-
 ```json
 { "error": { "code": "INTERNAL_ERROR", "message": "Ошибка сервера" } }
 ```
 
-**Пояснение:** аналогично `/accept`, но меняем статус на `rejected`, а `reason` — просто доп. поле.
+---
+
+### Быстрые примеры (curl)
+
+```bash
+# Получить профиль
+curl -i "http://localhost:8080/api/v1/users/7947922450"
+
+# Создать профиль
+curl -i -X POST "http://localhost:8080/api/v1/users" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d '{"tgId":7947922450,"name":"Алексей","city":"Казань","bio":"Ищу команду на олимпиады","skills":["graphs"],"subjects":["informatics"],"experienceLevel":"middle"}'
+
+# Создать команду
+curl -i -X POST "http://localhost:8080/api/v1/teams" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d '{"ownerTgId":7947922450,"title":"Кодим и побеждаем","olympiadId":"ol_10","description":"Ищем 1-2 сильных по графам","requiredSkills":["graphs","dp"],"city":"Казань","isRemoteAllowed":true}'
+
+# Отправить приглашение
+curl -i -X POST "http://localhost:8080/api/v1/teams/t_501/invites" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d '{"fromTgId":7947922450,"toTgId":8195976349,"message":"Привет! Ищем сильного по графам, го к нам?"}'
+```
 
 ---
+
+## Лицензия
+
+MIT (если нужно — поменяй на свою).
