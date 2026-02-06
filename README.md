@@ -894,7 +894,3 @@ curl -i -X POST "http://localhost:8080/api/v1/teams/t_501/invites" \
 ```
 
 ---
-
-## Лицензия
-
-MIT (если нужно — поменяй на свою).
