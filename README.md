@@ -217,61 +217,6 @@ Content-Encoding: gzip
 ```json
 {
   "tgId": 7947922450,
-  "name": "Алексей
-::contentReference[oaicite:0]{index=0}
-```
-
-
-Ок, продолжаю **без шаблонов**, **для каждого — полный блок**.
-
----
-
-## 1.3 Обновить профиль по tgId
-
-**Method:** PUT
-**URL:** `/api/v1/users/{tgId}` (пример: `/api/v1/users/7947922450`)
-
-**Заголовки запроса:**
-
-```http
-Host: localhost:8080
-Connection: keep-alive
-User-Agent: Sovokumus-WebApp/1.0
-Accept: application/json
-Accept-Language: ru-RU, ru;q=0.9, en;q=0.8
-Accept-Encoding: gzip, deflate
-Accept-Charset: utf-8
-Content-Type: application/json; charset=utf-8
-Content-Length: [автоматически]
-```
-
-**Тело запроса:**
-
-```json
-{
-  "name": "Алексей",
-  "city": "Казань",
-  "bio": "Сильный в алгоритмах",
-  "skills": ["graphs", "dp"],
-  "subjects": ["informatics"],
-  "experienceLevel": "advanced"
-}
-```
-
-**Заголовки ответов:**
-
-```http
-Content-Type: application/json; charset=utf-8
-Content-Encoding: gzip
-```
-
-**Тела ответов:**
-
-✅ **200 OK**
-
-```json
-{
-  "tgId": 7947922450,
   "name": "Алексей",
   "city": "Казань",
   "bio": "Сильный в алгоритмах",
